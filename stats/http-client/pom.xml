@@ -22,7 +22,7 @@
             <groupId>ru.yandex.practicum</groupId>
             <artifactId>stats-dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>install</scope>
         </dependency>
     </dependencies>
 

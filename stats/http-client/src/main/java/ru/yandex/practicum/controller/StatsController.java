@@ -26,6 +26,6 @@ public class StatsController {
                                            @RequestHeader(value = "unique", defaultValue = "false")
                                            boolean unique) {
         log.info("attempt to get all stats");
-        return statsClient.getStats(LocalDateTime.parse(start), LocalDateTime.parse(end), uris, unique);
+        return statsClient.getStats(start, end, uris, unique);
     }
 }

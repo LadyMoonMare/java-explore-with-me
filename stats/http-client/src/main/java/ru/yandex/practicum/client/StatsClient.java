@@ -24,7 +24,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, String[] uris,
+    public ResponseEntity<Object> getStats(String start, String end, String[] uris,
                                            Boolean unique) {
         Map<String, Object> params = Map.of(
                 "start", start,
