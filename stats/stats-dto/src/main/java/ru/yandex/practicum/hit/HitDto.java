@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class HitDto {
-    String app = "ewm-main-service";
+    private String app;
     @NotBlank
-    String uri;
+    private String uri;
     @NotBlank
-    String ip;
+    private String ip;
     @PastOrPresent
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 }
