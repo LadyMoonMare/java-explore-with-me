@@ -8,6 +8,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -23,7 +24,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getStats(String start, String end, String[] uris,
+    public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, String[] uris,
                                            Boolean unique) {
         Map<String, Object> params = Map.of(
                 "start", start,

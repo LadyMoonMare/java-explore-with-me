@@ -1,4 +1,4 @@
-package ru.yandex.practicum.hit;
+package ru.yandex.practicum.dto.hit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;

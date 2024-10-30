@@ -3,11 +3,11 @@ package ru.yandex.practicum.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.yandex.practicum.hit.HitDto;
+import ru.yandex.practicum.dto.hit.HitDto;
+
 
 @Service
 public class HitClient extends BaseClient {
@@ -22,7 +22,7 @@ public class HitClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> hitEndpoint(HitDto requestDto) {
-        return post("", requestDto);
+    public void hitEndpoint(HitDto requestDto) {
+        post("", requestDto);
     }
 }
