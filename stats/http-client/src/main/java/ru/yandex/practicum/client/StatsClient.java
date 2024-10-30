@@ -17,7 +17,7 @@ public class StatsClient extends BaseClient {
 
     @Autowired
     public StatsClient (@Value("${http-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super( builder
+        super(builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
                 .build()
