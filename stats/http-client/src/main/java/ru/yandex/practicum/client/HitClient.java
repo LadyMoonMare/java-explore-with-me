@@ -14,7 +14,7 @@ public class HitClient extends BaseClient {
     private static final String API_PREFIX = "/hit";
 
     @Autowired
-    public HitClient(@Value("${http-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public HitClient (@Value("${http-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super( builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
@@ -22,7 +22,7 @@ public class HitClient extends BaseClient {
         );
     }
 
-    public void hitEndpoint(HitDto requestDto) {
+    public void hitEndpoint(HitDto requestDto)  {
         post("", requestDto);
     }
 }
