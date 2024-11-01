@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>ru.yandex.practicum.</groupId>
+            <groupId>ru.yandex.practicum</groupId>
             <artifactId>stats-dto</artifactId>
             <version>${project.version}</version>
         </dependency>
