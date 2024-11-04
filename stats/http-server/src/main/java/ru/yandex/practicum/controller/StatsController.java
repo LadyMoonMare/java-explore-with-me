@@ -6,15 +6,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.dto.stats.StatsViewDto;
 import ru.yandex.practicum.exception.InvalidRequestDataException;
 import ru.yandex.practicum.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping(path = "/stats")
 @RequiredArgsConstructor
 @Slf4j
@@ -34,7 +36,7 @@ public class StatsController {
             log.warn("error of time borders");
             throw new InvalidRequestDataException("invalid time");
         }
-        log.info("attempt to get all stats");
+        log.info("attempt to get all stats for uris {}", Arrays.toString(uris));
         return statsService.getStats(timeStart,timeEnd,uris,unique);
     }
 
