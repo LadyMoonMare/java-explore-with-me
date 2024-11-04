@@ -21,9 +21,9 @@ public class Hit {
     private String app;
     @Column(name = "uri", nullable = false)
     private String uri;
-    @Column(name = "ip", nullable = false)
+    @Column(name = "ip")
     private String ip;
-    @Column(name = "time_stamp",nullable = false)
+    @Column(name = "time_stamp")
     private LocalDateTime timestamp;
 
     public Hit(String app, String uri, String ip, LocalDateTime timestamp) {

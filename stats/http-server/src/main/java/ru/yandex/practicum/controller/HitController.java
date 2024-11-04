@@ -1,5 +1,6 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,9 @@ public class HitController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void hitEndpoint(HitDto dto) {
+    public void hitEndpoint(@Valid HitDto dto) {
+        log.info("dto app{}, ip {}, uri {}, timestamp {}", dto.getApp(), dto.getIp()
+                , dto.getUri(), dto.getTimestamp());
         log.info("attempt to add endpoint to server");
         hitService.hitEndpoint(dto);
     }

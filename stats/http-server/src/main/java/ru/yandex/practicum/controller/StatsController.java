@@ -11,6 +11,7 @@ import ru.yandex.practicum.exception.InvalidRequestDataException;
 import ru.yandex.practicum.service.StatsService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -26,8 +27,8 @@ public class StatsController {
                                        @RequestParam(value = "uris", required = false) String[] uris,
                                        @RequestParam(value = "unique", defaultValue = "false")
                                        boolean unique) {
-        LocalDateTime timeStart = LocalDateTime.parse(start);
-        LocalDateTime timeEnd = LocalDateTime.parse(end);
+        LocalDateTime timeStart = toLocalDateTime(start);
+        LocalDateTime timeEnd = toLocalDateTime(end);
 
         if (timeStart.isAfter(timeEnd) || timeEnd.isBefore(timeStart)) {
             log.warn("error of time borders");
@@ -35,5 +36,10 @@ public class StatsController {
         }
         log.info("attempt to get all stats");
         return statsService.getStats(timeStart,timeEnd,uris,unique);
+    }
+
+    private LocalDateTime toLocalDateTime(String s) {
+        log.info("attempt to parse {} to localDateTime", s);
+        return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }
