@@ -10,7 +10,6 @@ import ru.yandex.practicum.model.StatsView;
 import ru.yandex.practicum.repository.HitRepository;
 import ru.yandex.practicum.repository.StatsRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -22,8 +21,8 @@ public class HitServiceImpl implements HitService {
 
     @Override
     public void hitEndpoint(HitDto dto) {
-        log.info("dto app{}, ip {}, uri {}, timestamp {}", dto.getApp(), dto.getIp()
-                , dto.getUri(), dto.getTimestamp());
+        log.info("dto app{}, ip {}, uri {}, timestamp {}", dto.getApp(), dto.getIp(),
+                dto.getUri(), dto.getTimestamp());
         Hit hit = HitMapper.fromHitDto(dto);
         log.info("adding hit {} to repository",hit);
         hitRepository.save(hit);

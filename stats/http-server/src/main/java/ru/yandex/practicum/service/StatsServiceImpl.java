@@ -3,8 +3,6 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
-import ru.yandex.practicum.dto.stats.StatsDto;
 import ru.yandex.practicum.dto.stats.StatsViewDto;
 import ru.yandex.practicum.mapper.StatsMapper;
 import ru.yandex.practicum.model.StatsView;
@@ -36,8 +34,8 @@ public class StatsServiceImpl implements StatsService {
     };
 
     @Override
-    public List<StatsViewDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris
-            , boolean unique){
+    public List<StatsViewDto> getStats(LocalDateTime start, LocalDateTime end, String[] uris,
+                                       boolean unique) {
         if (!unique) {
             log.info("getting all stats from repo");
             List<StatsView> allStats = statsRepository.getAllStats(start, end);
