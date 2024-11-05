@@ -3,6 +3,7 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.hit.HitDto;
 import ru.yandex.practicum.mapper.HitMapper;
 import ru.yandex.practicum.model.Hit;
@@ -19,6 +20,7 @@ public class HitServiceImpl implements HitService {
     private final HitRepository hitRepository;
     private final StatsRepository statsRepository;
 
+    @Transactional
     @Override
     public void hitEndpoint(HitDto dto) {
         log.info("dto app{}, ip {}, uri {}, timestamp {}", dto.getApp(), dto.getIp(),
