@@ -5,9 +5,9 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - db
+      - stats-db
     environment:
-        - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ewm-stats
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stats
         - SPRING_DATASOURCE_USER=ewm
         - SPRING_DATASOURCE_PASSWORD=ewm
 
@@ -16,16 +16,37 @@ services:
    container_name: explore-with-me-main
    ports:
      - "8080:8080"
+   depends_on:
+     - main-db
+   environment:
+     - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:6432/ewm-main
+     - SPRING_DATASOURCE_USER=ewm
+     - SPRING_DATASOURCE_PASSWORD=ewm
 
-  db:
+  stats-db:
     image: postgres:16.1
-    container_name: postgres
+    container_name: stats-db
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=ewm
       - POSTGRES_USER=ewm
       - POSTGRES_DB=ewm-stats
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  main-db:
+    image: postgres:16.1
+    container_name: main-db
+    ports:
+      - "6432:6432"
+    environment:
+      - POSTGRES_PASSWORD=ewm
+      - POSTGRES_USER=ewm
+      - POSTGRES_DB=ewm-main
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
