@@ -1,9 +1,11 @@
 package ru.yandex.practicum.user.dto.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.user.dto.NewUserRequest;
 import ru.yandex.practicum.user.dto.UserDto;
 import ru.yandex.practicum.user.model.User;
 
+@UtilityClass
 public class UserMapper {
     public static User fromUserRequestToUser(NewUserRequest request) {
         return new User(request.getEmail(), request.getName());
