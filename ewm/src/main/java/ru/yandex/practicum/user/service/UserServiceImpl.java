@@ -56,17 +56,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUsers(Integer[] ids, Integer from, Integer size) {
         if (ids == null) {
-            if (from == 0) {
-                log.info("getting all users only with limit");
-                return userRepository.findAllButSize(size).stream()
+            log.info("getting all users with limit {} and from {}", size, from);
+            return userRepository.findAllButLimit(from,size).stream()
                         .map(UserMapper::toUserDtoFromUser)
                         .collect(Collectors.toList());
-            } else {
-                log.info("getting all users with limit and from");
-                return userRepository.findAllButLimit(from,size).stream()
-                        .map(UserMapper::toUserDtoFromUser)
-                        .collect(Collectors.toList());
-            }
         } else {
             log.info("getting all users");
             List<User> allUsers = userRepository.findAll();
