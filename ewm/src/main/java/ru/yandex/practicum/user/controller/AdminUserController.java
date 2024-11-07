@@ -1,6 +1,7 @@
 package ru.yandex.practicum.user.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +40,10 @@ public class AdminUserController {
 
     @GetMapping
     @Validated
-    public List<UserDto> getUsers(@RequestParam(required = false) @Positive Integer[] ids,
-                                  @RequestParam(defaultValue = "0")
-                                  @PositiveOrZero Integer from, @RequestParam(defaultValue = "10")
-                                      @Positive Integer size) {
+    public List<UserDto> getUsers(@RequestParam(required = false) Integer[] ids,
+                                  @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                  @RequestParam(defaultValue = "10") @Positive Integer size) {
+        log.info("request to get users with params ids {}, from {}, size {}", ids, from,size);
         return userService.getUsers(ids, from, size);
     }
 }
