@@ -13,6 +13,9 @@ import ru.yandex.practicum.category.repository.CategoryRepository;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +40,7 @@ public class CategoryServiceImpl {
         //ADD 409
         log.info("attempt to delete category id = {} from repo",catId);
         Category category = getCategory(catId);
+        categoryRepository.delete(category);
         log.info("deleting success");
     }
 
@@ -54,6 +58,19 @@ public class CategoryServiceImpl {
             log.warn("updating category failure");
             throw new ConflictException("Category " + dto.getName() + "is already exist");
         }
+    }
+
+    public CategoryDto getCategoryById(Long catId) {
+        Category category = getCategory(catId);
+        log.info("getting success");
+        return CategoryMapper.fromCategoryToDto(category);
+    }
+
+    public List<CategoryDto> getCategories(Integer from, Integer size) {
+        log.info("attempt to get categories from repo");
+        return categoryRepository.getAllButLimit(from, size).stream()
+                .map(CategoryMapper::fromCategoryToDto)
+                .collect(Collectors.toList());
     }
 
     private Category getCategory(Long catId) {
