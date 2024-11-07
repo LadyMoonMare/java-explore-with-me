@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.category.dto.CategoryDto;
 import ru.yandex.practicum.category.dto.NewCategoryDto;
-import ru.yandex.practicum.category.service.CategoryServiceImpl;
+import ru.yandex.practicum.category.service.CategoryService;
 
 @RestController
 @Slf4j
@@ -17,7 +17,7 @@ import ru.yandex.practicum.category.service.CategoryServiceImpl;
 @RequiredArgsConstructor
 @Validated
 public class AdminCategoryController {
-    private final CategoryServiceImpl categoryService;
+    private final CategoryService categoryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

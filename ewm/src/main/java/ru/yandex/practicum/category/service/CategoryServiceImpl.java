@@ -19,9 +19,10 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CategoryServiceImpl {
+public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @Override
     @Transactional
     public CategoryDto addCategory(NewCategoryDto dto) {
         try {
@@ -35,6 +36,7 @@ public class CategoryServiceImpl {
         }
     }
 
+    @Override
     @Transactional
     public void deleteCategory(Long catId) {
         //ADD 409
@@ -44,6 +46,7 @@ public class CategoryServiceImpl {
         log.info("deleting success");
     }
 
+    @Override
     @Transactional
     public CategoryDto updateCategory(NewCategoryDto dto, Long catId) {
         try {
@@ -60,12 +63,14 @@ public class CategoryServiceImpl {
         }
     }
 
+    @Override
     public CategoryDto getCategoryById(Long catId) {
         Category category = getCategory(catId);
         log.info("getting success");
         return CategoryMapper.fromCategoryToDto(category);
     }
 
+    @Override
     public List<CategoryDto> getCategories(Integer from, Integer size) {
         log.info("attempt to get categories from repo");
         return categoryRepository.getAllButLimit(from, size).stream()
