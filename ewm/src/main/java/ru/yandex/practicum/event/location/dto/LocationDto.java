@@ -1,6 +1,6 @@
 package ru.yandex.practicum.event.location.dto;
 
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationDto {
-    @PositiveOrZero
+    @NotNull
     private Long lat;
-    @PositiveOrZero
+    @NotNull
     private Long lon;
 }

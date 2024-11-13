@@ -18,4 +18,9 @@ public class Location {
     private Long lat;
     @Column(name = "lon")
     private Long lon;
+
+    public Location(Long lat, Long lon) {
+        this.lat = lat;
+        this.lon = lon;
+    }
 }

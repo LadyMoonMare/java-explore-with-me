@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.event.location.dto.LocationDto;
@@ -14,20 +13,17 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class NewEventDto {
     @NotBlank
-    @Max(2000)
-    @Min(20)
+    @Size(min = 20, max = 2000)
     private String annotation;
     @NotNull
     private Long category;
     @NotBlank
-    @Max(7000)
-    @Min(20)
+    @Size(min = 20, max = 7000)
     private String description;
     @Future
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     @Valid
     @NotNull
@@ -36,7 +32,6 @@ public class NewEventDto {
     private Long participantLimit = 0L;
     private Boolean requestModeration = true;
     @NotBlank
-    @Max(120)
-    @Min(3)
+    @Size(min = 3, max = 120)
     private String title;
 }

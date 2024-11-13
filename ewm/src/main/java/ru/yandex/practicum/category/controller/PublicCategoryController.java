@@ -29,7 +29,7 @@ public class PublicCategoryController {
     @GetMapping
     public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @Min(0) Integer from,
                                            @RequestParam(defaultValue = "10") @Positive Integer size) {
-        log.info("attempt to get categories by params: from {}, size {}");
+        log.info("attempt to get categories by params: from {}, size {}",from, size);
         return categoryService.getCategories(from,size);
     }
 }

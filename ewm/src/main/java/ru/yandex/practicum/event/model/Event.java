@@ -9,7 +9,7 @@ import ru.yandex.practicum.user.model.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "location")
+@Table(name = "events")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,4 +40,18 @@ public class Event {
     private State state;
     private String title;
     private Long views;
+
+    public Event(String annotation, String description, LocalDateTime eventDate, Boolean paid,
+                 Long participantLimit, LocalDateTime publishedOn, Boolean requestModeration,
+                 State state, String title) {
+        this.annotation = annotation;
+        this.description = description;
+        this.eventDate = eventDate;
+        this.paid = paid;
+        this.participantLimit = participantLimit;
+        this.publishedOn = publishedOn;
+        this.requestModeration = requestModeration;
+        this.state = state;
+        this.title = title;
+    }
 }
