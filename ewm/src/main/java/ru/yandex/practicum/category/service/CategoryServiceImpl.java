@@ -10,6 +10,7 @@ import ru.yandex.practicum.category.dto.NewCategoryDto;
 import ru.yandex.practicum.category.dto.mapper.CategoryMapper;
 import ru.yandex.practicum.category.model.Category;
 import ru.yandex.practicum.category.repository.CategoryRepository;
+import ru.yandex.practicum.event.repository.EventRepository;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -39,11 +41,15 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(Long catId) {
-        //ADD 409
-        log.info("attempt to delete category id = {} from repo",catId);
-        Category category = getCategory(catId);
-        categoryRepository.delete(category);
-        log.info("deleting success");
+        log.info("attempt to delete category id = {} from repo, validation by events", catId);
+        if (eventRepository.findByCategory_id(catId).isEmpty()) {
+            Category category = getCategory(catId);
+            categoryRepository.delete(category);
+            log.info("deleting success");
+        } else {
+            log.warn("deleting failure");
+            throw new ConflictException("category is containing events");
+        }
     }
 
     @Override
