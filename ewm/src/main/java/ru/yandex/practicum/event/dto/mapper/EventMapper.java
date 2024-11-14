@@ -7,6 +7,7 @@ import ru.yandex.practicum.category.model.Category;
 import ru.yandex.practicum.event.dto.EventDto;
 import ru.yandex.practicum.event.dto.EventShortDto;
 import ru.yandex.practicum.event.dto.NewEventDto;
+import ru.yandex.practicum.event.dto.update.UpdateEventAdminRequest;
 import ru.yandex.practicum.event.dto.update.UpdateEventUserRequest;
 import ru.yandex.practicum.event.location.dto.LocationDto;
 import ru.yandex.practicum.event.location.model.Location;
@@ -22,25 +23,20 @@ import java.time.LocalDateTime;
 public class EventMapper {
     public static Event fromNewEventDtoToEvent(NewEventDto dto, Category category, User initiator,
                                                Location location) {
-        Event event = Event.builder()
+        return Event.builder()
                 .annotation(dto.getAnnotation())
                 .description(dto.getDescription())
                 .participantLimit(dto.getParticipantLimit())
                 .eventDate(dto.getEventDate())
                 .paid(dto.getPaid())
-                .publishedOn(LocalDateTime.now())
+                .createdOn(LocalDateTime.now())
                 .requestModeration(dto.getRequestModeration())
                 .title(dto.getTitle())
                 .location(location)
+                .state(State.PENDING)
                 .category(category)
                 .user(initiator)
                 .build();
-        if (dto.getRequestModeration()) {
-            event.setState(State.SEND_TO_REVIEW);
-        } else {
-            event.setState(State.PUBLISHED);
-        }
-        return event;
     }
 
     public static EventShortDto fromEventToShortDto(Event event) {
@@ -60,7 +56,7 @@ public class EventMapper {
     }
 
     public static EventDto fromEventToDto(Event event) {
-        return EventDto.builder()
+        EventDto eventDto = EventDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .description(event.getDescription())
@@ -73,14 +69,22 @@ public class EventMapper {
                 .title(event.getTitle())
                 .location(new LocationDto(event.getLocation().getLat(),event.getLocation().getLon()))
                 .participantLimit(event.getParticipantLimit())
-                .publishedOn(event.getPublishedOn())
+                .createdOn(event.getCreatedOn())
                 .requestModeration(event.getRequestModeration())
                 .views(event.getViews())
                 .build();
+
+        if (eventDto.getState().equals(State.PUBLISHED)) {
+            eventDto.setPublishedOn(LocalDateTime.now());
+        }
+
+        return eventDto;
     }
 
-    public static Event fromUserUpdateRequestToEvent(UpdateEventUserRequest dto) {
-        return Event.builder()
+    public static UpdateEventUserRequest fromAdminRequestToUserRequest(UpdateEventAdminRequest dto) {
+        return UpdateEventUserRequest.builder()
+                .category(dto.getCategory())
+                .location(dto.getLocation())
                 .eventDate(dto.getEventDate())
                 .paid(dto.getPaid())
                 .requestModeration(dto.getRequestModeration())
@@ -88,7 +92,7 @@ public class EventMapper {
                 .annotation(dto.getAnnotation())
                 .description(dto.getDescription())
                 .participantLimit(dto.getParticipantLimit())
-                .state(dto.getStateAction())
+                .stateAction(dto.getStateAction())
                 .build();
     }
 }

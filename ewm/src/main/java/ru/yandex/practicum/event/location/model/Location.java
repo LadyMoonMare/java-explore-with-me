@@ -15,11 +15,11 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "lat")
-    private Long lat;
+    private Double lat;
     @Column(name = "lon")
-    private Long lon;
+    private Double lon;
 
-    public Location(Long lat, Long lon) {
+    public Location(Double lat, Double lon) {
         this.lat = lat;
         this.lon = lon;
     }
