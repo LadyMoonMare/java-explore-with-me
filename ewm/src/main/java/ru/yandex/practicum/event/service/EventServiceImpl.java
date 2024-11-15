@@ -17,6 +17,7 @@ import ru.yandex.practicum.event.location.repository.LocationRepository;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.event.model.State;
 import ru.yandex.practicum.event.repository.EventRepository;
+import ru.yandex.practicum.request.repository.RequestRepository;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.user.model.User;
@@ -161,13 +162,9 @@ public class EventServiceImpl {
             }
         }
 
-        if (dto.getEventDate() != null
-                && !dto.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+        if (dto.getEventDate() != null) {
             log.info("new date {}", dto.getEventDate());
             event.setEventDate(dto.getEventDate());
-        } else {
-            log.warn("updating failure");
-            throw new ConflictException("Invalid event date.");
         }
 
         setEventFields(EventMapper.fromAdminRequestToUserRequest(dto), event);
