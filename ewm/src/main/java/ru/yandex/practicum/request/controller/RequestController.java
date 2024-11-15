@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.request.dto.EventRequestStatusUpdateResult;
-import ru.yandex.practicum.request.service.RequestServiceImpl;
+import ru.yandex.practicum.request.service.RequestService;
 import ru.yandex.practicum.request.dto.RequestDto;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class RequestController {
-    private final RequestServiceImpl requestService;
+    private final RequestService requestService;
 
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)

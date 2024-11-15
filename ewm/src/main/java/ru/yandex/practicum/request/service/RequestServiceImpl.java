@@ -28,11 +28,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RequestServiceImpl {
+public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
 
+    @Override
     @Transactional
     public RequestDto addRequest(Long userId, Long eventId) {
         log.info("attempt tp add request");
@@ -74,6 +75,7 @@ public class RequestServiceImpl {
         }
     }
 
+    @Override
     @Transactional
     public RequestDto cancelRequest(Long userId, Long requestId) {
         log.info("attempt to cancel request");
@@ -95,6 +97,7 @@ public class RequestServiceImpl {
         return RequestMapper.fromRequestToDto(request);
     }
 
+    @Override
     public List<RequestDto> getRequestsByUserId(Long userId) {
         log.info("attempt to get all request by user id = {}", userId);
         User user = getUser(userId);
@@ -103,6 +106,7 @@ public class RequestServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<RequestDto> getRequestsByEventId(Long userId, Long eventId) {
         log.info("attempt to get all requests by user id = {} to event = {}", userId, eventId);
         User user = getUser(userId);
@@ -117,6 +121,7 @@ public class RequestServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional
     public EventRequestStatusUpdateResult updateRequests(Long userId, Long eventId,
                                                          EventRequestStatusUpdateRequest request) {
