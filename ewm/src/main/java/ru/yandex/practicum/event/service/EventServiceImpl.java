@@ -1,5 +1,6 @@
 package ru.yandex.practicum.event.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -172,6 +173,24 @@ public class EventServiceImpl {
         log.info("updating success");
         return EventMapper.fromEventToDto(event);
 
+    }
+
+    @Transactional
+    public EventDto getEventPublic(Long id, HttpServletRequest request) {
+        log.info("attempt to update event {} by public", id);
+        Event event = getEventById(id);
+        if (event.getViews() == null) {
+            event.setViews(0L);
+        }
+        event.setViews(event.getViews() + 1);
+        event = eventRepository.save(event);
+
+        //add statistics
+        return EventMapper.fromEventToDto(event);
+    }
+
+    public List<EventShortDto> getEventsPublic() {
+        return null;
     }
 
     private void setEventFields(UpdateEventUserRequest dto, Event event) {
