@@ -55,18 +55,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto updateCategory(NewCategoryDto dto, Long catId) {
-        try {
-            log.info("attempt to update category id = {}", catId);
-            Category category = getCategory(catId);
+        log.info("attempt to update category id = {}", catId);
+        Category category = getCategory(catId);
 
-            category.setName(dto.getName());
-            categoryRepository.save(category);
-            log.info("updating success");
-            return CategoryMapper.fromCategoryToDto(category);
-        }  catch (DataIntegrityViolationException e) {
-            log.warn("updating category failure");
-            throw new ConflictException("Category " + dto.getName() + "is already exist");
+        if (categoryRepository.findByName(dto.getName()).isPresent()) {
+                log.warn("updating category failure");
+                throw new ConflictException("Category " + dto.getName() + "is already exist");
         }
+
+        category.setName(dto.getName());
+        categoryRepository.save(category);
+        log.info("updating success");
+        return CategoryMapper.fromCategoryToDto(category);
     }
 
     @Override
