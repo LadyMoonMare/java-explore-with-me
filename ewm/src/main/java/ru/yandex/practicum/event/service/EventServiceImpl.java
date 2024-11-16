@@ -1,12 +1,17 @@
 package ru.yandex.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.category.model.Category;
 import ru.yandex.practicum.category.repository.CategoryRepository;
+import ru.yandex.practicum.client.HitClient;
+import ru.yandex.practicum.dto.hit.HitDto;
 import ru.yandex.practicum.event.dto.EventDto;
 import ru.yandex.practicum.event.dto.EventShortDto;
 import ru.yandex.practicum.event.dto.NewEventDto;
@@ -18,16 +23,13 @@ import ru.yandex.practicum.event.location.repository.LocationRepository;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.event.model.State;
 import ru.yandex.practicum.event.repository.EventRepository;
-import ru.yandex.practicum.request.repository.RequestRepository;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +40,7 @@ public class EventServiceImpl {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final HitClient statsClient;
 
     @Transactional
     public EventDto addEvent(Long userId, NewEventDto dto) {
@@ -138,7 +141,10 @@ public class EventServiceImpl {
             finalList.addAll(sublist);
         }
 
-        return finalList.stream()
+        if (finalList.isEmpty()) {
+            finalList = allEvents;
+        }
+        return new HashSet<>(finalList).stream()
                 .map(EventMapper::fromEventToDto)
                 .collect(Collectors.toList());
     }
@@ -185,12 +191,122 @@ public class EventServiceImpl {
         event.setViews(event.getViews() + 1);
         event = eventRepository.save(event);
 
-        //add statistics
+        log.info("adding statistics");
+        statsClient.hitEndpoint(HitDto.builder()
+                .app("ewm-main-service")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build());
         return EventMapper.fromEventToDto(event);
     }
 
-    public List<EventShortDto> getEventsPublic() {
-        return null;
+    public List<EventShortDto> getEventsPublic(String text,Long[] categories, Boolean paid,
+                                               LocalDateTime start, LocalDateTime end,
+                                               Boolean onlyAvailable, String sort, Integer from,
+                                               Integer size, HttpServletRequest request) {
+        List<Event> allEvents;
+        log.info("getting all events from repo");
+        if (end == null) {
+            allEvents = eventRepository.findAllButLimitAndStart(from, size, start);
+        } else {
+            log.info("getting all events from repo");
+            allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
+        }
+        List<Event> finalList = sortEventsForPublic(allEvents,categories , paid, onlyAvailable,
+                sort, text);
+
+        log.info("adding statistics");
+        statsClient.hitEndpoint(HitDto.builder()
+                .app("ewm-main-service")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        return finalList.stream()
+                .map(EventMapper::fromEventToShortDto)
+                .collect(Collectors.toList());
+    }
+
+    private List<Event> sortEventsForPublic(List<Event> allEvents, Long[] categories, Boolean paid,
+                                            Boolean onlyAvailable, String sort, String text) {
+        log.info("sorting all events");
+        List<Event> finalList = new ArrayList<>();
+
+        if (onlyAvailable) {
+            log.info("sorting by available");
+
+            List<Event> sublist = allEvents.stream()
+                    .filter(e -> !e.getParticipantLimit().equals(e.getConfirmedRequests()))
+                    .toList();
+            finalList.addAll(sublist);
+        }
+
+        if (!text.isBlank()) {
+            log.info("sorting by text {}", text);
+            List<Event> sublist = allEvents.stream()
+                    .filter(e -> e.getAnnotation().toLowerCase().contains(text.toLowerCase()) ||
+                            e.getDescription().toLowerCase().contains(text.toLowerCase()))
+                    .toList();
+            finalList.addAll(sublist);
+        }
+
+        if (paid != null) {
+            log.info("sorting by paid {}", paid);
+            List<Event> sublist = allEvents.stream()
+                    .filter(e -> {
+                        if (paid) {
+                            return e.getPaid().equals(true);
+                        } else {
+                            return e.getPaid().equals(false);
+                        }
+                    })
+                    .toList();
+            finalList.addAll(sublist);
+        }
+
+        if (categories != null) {
+            log.info("sorting by categories {}", Arrays.toString(categories));
+            for (Long id : categories) {
+                List<Event> sublist = allEvents.stream()
+                        .filter(e -> e.getCategory().getId().equals(id))
+                        .toList();
+                finalList.addAll(sublist);
+            }
+        }
+
+         if(finalList.isEmpty()) {
+             log.info("no special filters result = all events by time");
+             finalList = allEvents;
+         }
+
+         if (sort != null) {
+             log.info("sorting by views");
+             if (sort.equals("VIEWS")) {
+                 finalList.sort(new Comparator<Event>() {
+                     @Override
+                     public int compare(Event o1, Event o2) {
+                         return (int) (o1.getViews() - o2.getViews());
+                     }
+                 });
+             } else if (sort.equals("EVENT_DATE")) {
+                 log.info("sorting by date");
+                 finalList.sort(new Comparator<Event>() {
+                     @Override
+                     public int compare(Event o1, Event o2) {
+                         if (o1.getEventDate().isAfter(o2.getEventDate())) {
+                             return 1;
+                         } else if (o1.getEventDate().isBefore(o2.getEventDate())) {
+                             return -1;
+                         } else {
+                             return 0;
+                         }
+                     }
+                 });
+             }
+         }
+         return new HashSet<>(finalList).stream().toList();
     }
 
     private void setEventFields(UpdateEventUserRequest dto, Event event) {

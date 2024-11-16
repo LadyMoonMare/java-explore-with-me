@@ -1,16 +1,19 @@
 package ru.yandex.practicum.event.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.event.dto.EventDto;
+import ru.yandex.practicum.event.dto.EventShortDto;
 import ru.yandex.practicum.event.service.EventServiceImpl;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -24,5 +27,33 @@ public class PublicEventController {
     public EventDto getEvent(@PathVariable @Positive Long id, HttpServletRequest request) {
         log.info("attempt to get event {} from public", id);
         return eventService.getEventPublic(id, request);
+    }
+
+    @GetMapping
+    public List<EventShortDto> getEvents(@RequestParam String text, @RequestParam Long[] categories,
+                                         @RequestParam Boolean paid, @RequestParam String rangeStart,
+                                         @RequestParam String rangeEnd,
+                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                         @RequestParam String sort,
+                                         @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                         @RequestParam(defaultValue = "10") @Positive Integer size,
+                                         HttpServletRequest request) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        if (rangeStart != null) {
+            start = toLocalDateTime(rangeStart);
+        }
+
+        if (rangeEnd != null) {
+            end = toLocalDateTime(rangeEnd);
+        }
+        log.info("attempt to get events from public");
+        return eventService.getEventsPublic(text,categories,paid, start, end, onlyAvailable,
+                sort, from, size, request);
+    }
+
+    private LocalDateTime toLocalDateTime(String s) {
+        log.info("attempt to parse {} to localDateTime", s);
+        return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

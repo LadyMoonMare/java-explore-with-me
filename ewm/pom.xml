@@ -65,6 +65,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ru.yandex.practicum</groupId>
+            <artifactId>http-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.yandex.practicum</groupId>
+            <artifactId>http-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
