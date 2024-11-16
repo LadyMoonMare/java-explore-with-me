@@ -27,4 +27,6 @@ public interface EventRepository extends JpaRepository<Event,Long> {
             "where e.event_date > ?3 " +
             "limit ?2 offset ?1 ", nativeQuery = true)
     List<Event> findAllButLimitAndStart(Integer from, Integer size, LocalDateTime start);
+
+    List<Event> findByIdIn(List<Long> ids);
 }
