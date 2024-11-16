@@ -1,6 +1,7 @@
 package ru.yandex.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,14 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
-    private final HitClient statsClient;
+    private final HitClient hitClient;
+    private final Comparator<Event> comparator = new Comparator<Event>() {
+        @Override
+        public int compare(Event o1, Event o2) {
+            return (int) (o2.getId() - o1.getId());
+        }
+    };
+    private final Set<String> uniqueIp = new HashSet<>();
 
     @Override
     @Transactional
@@ -79,21 +87,18 @@ public class EventServiceImpl implements EventService {
         log.info("attempt to update event {} by user", eventId);
         User user = getUser(userId);
         Event event = getEventById(eventId);
+
         if (!event.getUser().equals(user)) {
-            log.warn("updating failure");
-            throw new ConflictException("User id = " + userId + " is not initiator of event id = "
-                    + eventId);
+            log.warn("update failure");
+            throw new ConflictException("User is not owner of this event");
         }
 
-        if (dto.getStateAction() != null && (event.getState().equals(State.PUBLISHED))) {
-            log.warn("updating failure");
-            throw new ConflictException("Updating published event is forbidden");
-        } else if (dto.getStateAction() != null) {
+        if (dto.getStateAction() != null) {
             log.info("new state {}", dto.getStateAction());
             if (dto.getStateAction().equals(State.CANCEL_REVIEW)) {
                 event.setState(State.CANCELED);
             } else {
-                event.setState(State.PUBLISHED);
+                event.setState(State.PENDING);
             }
         }
 
@@ -114,7 +119,18 @@ public class EventServiceImpl implements EventService {
                                            LocalDateTime start, LocalDateTime end, Integer from,
                                            Integer size) {
         log.info("getting all events from repo");
-        List<Event> allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
+        List<Event> allEvents;
+        if (start == null && end == null) {
+            allEvents = eventRepository.findAllButLimit(from,size);
+        } else {
+            if (start != null && end != null) {
+                allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
+            } else if (start != null){
+                allEvents = eventRepository.findAllButLimitAndStart(from, size, start);
+            } else {
+                allEvents = eventRepository.findAllButLimitAndEnd(from, size, end);
+            }
+        }
         List<Event> finalList = new ArrayList<>();
 
         log.info("sorting all events by params");
@@ -136,17 +152,20 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        for (String state : states) {
-            List<Event> sublist = allEvents.stream()
-                    .filter(e -> Objects.equals(e.getState(), State.valueOf(state)))
-                    .toList();
-            finalList.addAll(sublist);
+        if (states != null) {
+            for (String state : states) {
+                List<Event> sublist = allEvents.stream()
+                        .filter(e -> Objects.equals(e.getState(), State.valueOf(state)))
+                        .toList();
+                finalList.addAll(sublist);
+            }
         }
 
         if (finalList.isEmpty()) {
             finalList = allEvents;
         }
         return new HashSet<>(finalList).stream()
+                .sorted(comparator)
                 .map(EventMapper::fromEventToDto)
                 .collect(Collectors.toList());
     }
@@ -158,18 +177,23 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
 
         if (dto.getStateAction() != null) {
-            if (!(event.getState().equals(State.PENDING)
-                    || event.getState().equals(State.SEND_TO_REVIEW))) {
+            if (!(event.getState().equals(State.PENDING) &&
+                    (dto.getStateAction().equals(State.REJECT_EVENT) ||
+                            dto.getStateAction().equals(State.PUBLISH_EVENT)))) {
                 log.warn("updating failure");
                 throw new ConflictException("Invalid state");
             } else {
                 log.info("new state {}", dto.getStateAction());
-                if (dto.getStateAction().equals(State.CANCEL_REVIEW)) {
+                if (dto.getStateAction().equals(State.REJECT_EVENT)) {
                     event.setState(State.CANCELED);
                 } else {
                     event.setState(State.PUBLISHED);
                 }
             }
+        }
+
+        if (event.getState().equals(State.PUBLISHED)) {
+            event.setPublishedOn(LocalDateTime.now());
         }
 
         if (dto.getEventDate() != null) {
@@ -189,19 +213,29 @@ public class EventServiceImpl implements EventService {
     public EventDto getEventPublic(Long id, HttpServletRequest request) {
         log.info("attempt to update event {} by public", id);
         Event event = getEventById(id);
+
+        if (!event.getState().equals(State.PUBLISHED)) {
+            log.warn("getting forbidden");
+            throw new NotFoundException("Event " + id + " is unpublished");
+        }
+
         if (event.getViews() == null) {
             event.setViews(0L);
         }
-        event.setViews(event.getViews() + 1);
-        event = eventRepository.save(event);
 
         log.info("adding statistics");
-        statsClient.hitEndpoint(HitDto.builder()
+        hitClient.hitEndpoint(HitDto.builder()
                 .app("ewm-main-service")
                 .ip(request.getRemoteAddr())
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build());
+
+        if (!uniqueIp.contains(request.getRemoteAddr())) {
+            event.setViews(event.getViews() + 1);
+            event = eventRepository.save(event);
+            uniqueIp.add(request.getRemoteAddr());
+        }
         return EventMapper.fromEventToDto(event);
     }
 
@@ -216,13 +250,17 @@ public class EventServiceImpl implements EventService {
             allEvents = eventRepository.findAllButLimitAndStart(from, size, start);
         } else {
             log.info("getting all events from repo");
+            if (start.isAfter(end)) {
+                log.warn("getting events failure");
+                throw new ValidationException("Invalid range");
+            }
             allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
         }
         List<Event> finalList = sortEventsForPublic(allEvents,categories , paid, onlyAvailable,
                 sort, text);
 
         log.info("adding statistics");
-        statsClient.hitEndpoint(HitDto.builder()
+        hitClient.hitEndpoint(HitDto.builder()
                 .app("ewm-main-service")
                 .ip(request.getRemoteAddr())
                 .uri(request.getRequestURI())
@@ -230,6 +268,7 @@ public class EventServiceImpl implements EventService {
                 .build());
 
         return finalList.stream()
+                .sorted(comparator)
                 .map(EventMapper::fromEventToShortDto)
                 .collect(Collectors.toList());
     }
@@ -248,7 +287,7 @@ public class EventServiceImpl implements EventService {
             finalList.addAll(sublist);
         }
 
-        if (!text.isBlank()) {
+        if (text != null && !text.isBlank()) {
             log.info("sorting by text {}", text);
             List<Event> sublist = allEvents.stream()
                     .filter(e -> e.getAnnotation().toLowerCase().contains(text.toLowerCase()) ||
@@ -287,8 +326,9 @@ public class EventServiceImpl implements EventService {
          }
 
          if (sort != null) {
-             log.info("sorting by views");
+             log.info("sort {}",sort);
              if (sort.equals("VIEWS")) {
+                 log.info("sorting by views");
                  finalList.sort(new Comparator<Event>() {
                      @Override
                      public int compare(Event o1, Event o2) {

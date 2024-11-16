@@ -60,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Event is unavailable for requests");
         }
 
-        if (event.getRequestModeration().equals(false)) {
+        if (event.getRequestModeration().equals(false) || event.getParticipantLimit() == 0) {
             Request request = new Request(LocalDateTime.now(), event, user, RequestState.CONFIRMED);
             requestRepository.save(request);
 

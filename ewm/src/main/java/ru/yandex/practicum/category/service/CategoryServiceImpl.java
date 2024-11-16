@@ -15,6 +15,7 @@ import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +59,8 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("attempt to update category id = {}", catId);
         Category category = getCategory(catId);
 
-        if (categoryRepository.findByName(dto.getName()).isPresent()) {
+        if (categoryRepository.findByName(dto.getName()).isPresent() &&
+                !Objects.equals(categoryRepository.findByName(dto.getName()).get().getId(), catId)) {
                 log.warn("updating category failure");
                 throw new ConflictException("Category " + dto.getName() + "is already exist");
         }

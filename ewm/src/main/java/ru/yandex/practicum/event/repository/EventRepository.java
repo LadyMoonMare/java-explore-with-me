@@ -24,9 +24,18 @@ public interface EventRepository extends JpaRepository<Event,Long> {
     List<Event> findAllByInitiatorButLimit(Integer from, Integer size, Long userId);
 
     @Query(value = "select * from events e " +
+            "limit ?2 offset ?1", nativeQuery = true)
+    List<Event> findAllButLimit(Integer from, Integer size);
+
+    @Query(value = "select * from events e " +
             "where e.event_date > ?3 " +
             "limit ?2 offset ?1 ", nativeQuery = true)
     List<Event> findAllButLimitAndStart(Integer from, Integer size, LocalDateTime start);
+
+    @Query(value = "select * from events e " +
+            "where e.event_date < ?3 " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Event> findAllButLimitAndEnd(Integer from, Integer size, LocalDateTime end);
 
     List<Event> findByIdIn(List<Long> ids);
 }

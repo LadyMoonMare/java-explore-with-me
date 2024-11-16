@@ -14,14 +14,14 @@ import java.util.Objects;
 @Builder
 @NoArgsConstructor
 public class NewCompilationDto {
-    Boolean pinned;
+    Boolean pinned = false;
     @NotBlank
     @Size(min = 1, max = 50)
     String title;
     List<Long> events;
 
     public NewCompilationDto(Boolean pinned, String title, List<Long> events) {
-        this.pinned = Objects.requireNonNullElse(pinned, false);
+        this.pinned = pinned;
         this.title = title;
         this.events = events;
     }

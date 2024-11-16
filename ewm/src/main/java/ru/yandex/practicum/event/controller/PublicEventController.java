@@ -30,11 +30,13 @@ public class PublicEventController {
     }
 
     @GetMapping
-    public List<EventShortDto> getEvents(@RequestParam String text, @RequestParam Long[] categories,
-                                         @RequestParam Boolean paid, @RequestParam String rangeStart,
-                                         @RequestParam String rangeEnd,
+    public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
+                                         @RequestParam(required = false) Long[] categories,
+                                         @RequestParam(required = false) Boolean paid,
+                                         @RequestParam(required = false) String rangeStart,
+                                         @RequestParam(required = false) String rangeEnd,
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                                         @RequestParam String sort,
+                                         @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                          @RequestParam(defaultValue = "10") @Positive Integer size,
                                          HttpServletRequest request) {
@@ -42,6 +44,8 @@ public class PublicEventController {
         LocalDateTime end = null;
         if (rangeStart != null) {
             start = toLocalDateTime(rangeStart);
+        } else {
+            start = LocalDateTime.now();
         }
 
         if (rangeEnd != null) {

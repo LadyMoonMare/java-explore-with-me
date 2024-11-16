@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 public class EventMapper {
     public static Event fromNewEventDtoToEvent(NewEventDto dto, Category category, User initiator,
                                                Location location) {
-        return Event.builder()
+        Event event = Event.builder()
                 .annotation(dto.getAnnotation())
                 .description(dto.getDescription())
                 .participantLimit(dto.getParticipantLimit())
@@ -37,12 +37,17 @@ public class EventMapper {
                 .category(category)
                 .user(initiator)
                 .build();
+
+        if (event.getParticipantLimit() == null) {
+            event.setParticipantLimit(0L);
+        }
+        return event;
     }
 
     public static EventShortDto fromEventToShortDto(Event event) {
         CategoryDto category = CategoryMapper.fromCategoryToDto(event.getCategory());
         UserShortDto user = UserMapper.fromUserToShortDto(event.getUser());
-        return EventShortDto.builder()
+        EventShortDto dto = EventShortDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .category(category)
@@ -53,6 +58,15 @@ public class EventMapper {
                 .title(event.getTitle())
                 .views(event.getViews())
                 .build();
+
+        if (dto.getConfirmedRequests() == null) {
+            dto.setConfirmedRequests(0L);
+        }
+
+        if (dto.getViews() == null) {
+            dto.setViews(0L);
+        }
+        return dto;
     }
 
     public static EventDto fromEventToDto(Event event) {
@@ -74,10 +88,13 @@ public class EventMapper {
                 .views(event.getViews())
                 .build();
 
-        if (eventDto.getState().equals(State.PUBLISHED)) {
-            eventDto.setPublishedOn(LocalDateTime.now());
+        if (eventDto.getConfirmedRequests() == null) {
+            eventDto.setConfirmedRequests(0L);
         }
 
+        if (eventDto.getViews() == null) {
+            eventDto.setViews(0L);
+        }
         return eventDto;
     }
 
