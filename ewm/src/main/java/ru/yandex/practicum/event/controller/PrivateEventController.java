@@ -12,7 +12,7 @@ import ru.yandex.practicum.event.dto.EventDto;
 import ru.yandex.practicum.event.dto.EventShortDto;
 import ru.yandex.practicum.event.dto.NewEventDto;
 import ru.yandex.practicum.event.dto.update.UpdateEventUserRequest;
-import ru.yandex.practicum.event.service.EventServiceImpl;
+import ru.yandex.practicum.event.service.EventService;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class PrivateEventController {
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

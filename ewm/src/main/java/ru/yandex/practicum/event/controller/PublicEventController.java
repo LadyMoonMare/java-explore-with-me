@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.event.dto.EventDto;
 import ru.yandex.practicum.event.dto.EventShortDto;
-import ru.yandex.practicum.event.service.EventServiceImpl;
+import ru.yandex.practicum.event.service.EventService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class PublicEventController {
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     @GetMapping("/{id}")
     public EventDto getEvent(@PathVariable @Positive Long id, HttpServletRequest request) {

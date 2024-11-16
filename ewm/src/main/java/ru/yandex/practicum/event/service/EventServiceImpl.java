@@ -1,13 +1,10 @@
 package ru.yandex.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.category.model.Category;
 import ru.yandex.practicum.category.repository.CategoryRepository;
 import ru.yandex.practicum.client.HitClient;
@@ -35,13 +32,14 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EventServiceImpl {
+public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final HitClient statsClient;
 
+    @Override
     @Transactional
     public EventDto addEvent(Long userId, NewEventDto dto) {
         log.info("attempt to add event to repo");
@@ -56,6 +54,7 @@ public class EventServiceImpl {
         return EventMapper.fromEventToDto(event);
     }
 
+    @Override
     public List<EventShortDto> getEventsByUser(Long userId, Integer from, Integer size) {
         log.info("attempt to get events from repo by user {}", userId);
         User user = getUser(userId);
@@ -65,6 +64,7 @@ public class EventServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public EventDto getEvent(Long userId, Long eventId) {
         User user = getUser(userId);
         log.info("attempt to get event with id {}", eventId);
@@ -73,6 +73,7 @@ public class EventServiceImpl {
         return EventMapper.fromEventToDto(event);
     }
 
+    @Override
     @Transactional
     public EventDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest dto) {
         log.info("attempt to update event {} by user", eventId);
@@ -108,6 +109,7 @@ public class EventServiceImpl {
         return EventMapper.fromEventToDto(event);
     }
 
+    @Override
     public List<EventDto> getEventsByAdmin(Long[] users, String[] states, Long[] categories,
                                            LocalDateTime start, LocalDateTime end, Integer from,
                                            Integer size) {
@@ -149,6 +151,7 @@ public class EventServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional
     public EventDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest dto) {
         log.info("attempt to update event {} by admin", eventId);
@@ -181,6 +184,7 @@ public class EventServiceImpl {
 
     }
 
+    @Override
     @Transactional
     public EventDto getEventPublic(Long id, HttpServletRequest request) {
         log.info("attempt to update event {} by public", id);
@@ -201,7 +205,8 @@ public class EventServiceImpl {
         return EventMapper.fromEventToDto(event);
     }
 
-    public List<EventShortDto> getEventsPublic(String text,Long[] categories, Boolean paid,
+    @Override
+    public List<EventShortDto> getEventsPublic(String text, Long[] categories, Boolean paid,
                                                LocalDateTime start, LocalDateTime end,
                                                Boolean onlyAvailable, String sort, Integer from,
                                                Integer size, HttpServletRequest request) {
