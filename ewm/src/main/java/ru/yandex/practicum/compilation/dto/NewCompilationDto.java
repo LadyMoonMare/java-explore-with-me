@@ -12,11 +12,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 public class NewCompilationDto {
-    Boolean pinned = false;
+    private Boolean pinned = false;
     @NotBlank
     @Size(min = 1, max = 50)
-    String title;
-    List<Long> events;
+    private String title;
+    private List<Long> events;
 
     public NewCompilationDto(Boolean pinned, String title, List<Long> events) {
         this.pinned = pinned;

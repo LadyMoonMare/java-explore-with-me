@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class NewCategoryDto {
     @NotBlank
     @Size(max = 50)
-    String name;
+    private String name;
 }

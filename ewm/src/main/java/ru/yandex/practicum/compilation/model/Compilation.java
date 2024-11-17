@@ -18,14 +18,14 @@ import java.util.List;
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    Boolean pinned;
-    String title;
+    private Long id;
+    private Boolean pinned;
+    private String title;
     @ManyToMany
     @JoinTable(name = "compilations_events",
             joinColumns = {@JoinColumn(name = "compilation_id")},
             inverseJoinColumns = {@JoinColumn(name = "event_id")})
-    List<Event> events;
+    private List<Event> events;
 
     public Compilation(Boolean pinned, String title, List<Event> events) {
         this.pinned = pinned;
