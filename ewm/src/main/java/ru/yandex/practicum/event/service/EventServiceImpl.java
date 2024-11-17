@@ -125,7 +125,7 @@ public class EventServiceImpl implements EventService {
         } else {
             if (start != null && end != null) {
                 allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
-            } else if (start != null){
+            } else if (start != null) {
                 allEvents = eventRepository.findAllButLimitAndStart(from, size, start);
             } else {
                 allEvents = eventRepository.findAllButLimitAndEnd(from, size, end);
@@ -256,7 +256,7 @@ public class EventServiceImpl implements EventService {
             }
             allEvents = eventRepository.findAllButLimitAndTime(from, size, start, end);
         }
-        List<Event> finalList = sortEventsForPublic(allEvents,categories , paid, onlyAvailable,
+        List<Event> finalList = sortEventsForPublic(allEvents, categories, paid, onlyAvailable,
                 sort, text);
 
         log.info("adding statistics");
@@ -320,7 +320,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-         if(finalList.isEmpty()) {
+         if (finalList.isEmpty()) {
              log.info("no special filters result = all events by time");
              finalList = allEvents;
          }

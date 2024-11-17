@@ -3,7 +3,6 @@ package ru.yandex.practicum.request.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.request.model.Request;
-import ru.yandex.practicum.request.model.RequestState;
 import ru.yandex.practicum.user.model.User;
 
 import java.util.List;

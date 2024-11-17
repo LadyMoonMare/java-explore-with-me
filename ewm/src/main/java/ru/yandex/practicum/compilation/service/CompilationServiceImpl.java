@@ -43,7 +43,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     @Transactional
-    public void deleteCompilation(Long compId){
+    public void deleteCompilation(Long compId) {
         log.info("attempt to delete compilation = {} from repo", compId);
         Compilation compilation = getCompilation(compId);
         compilationRepository.delete(compilation);

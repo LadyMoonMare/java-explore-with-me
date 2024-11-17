@@ -36,7 +36,7 @@ public class AdminEventController {
         LocalDateTime start = null;
         LocalDateTime end = null;
 
-        if(rangeStart != null) {
+        if (rangeStart != null) {
             start = toLocalDateTime(rangeStart);
         }
 

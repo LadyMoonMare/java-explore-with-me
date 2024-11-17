@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event,Long> {
     @Query(value = "select * from events " +
             "where category_id = ?1", nativeQuery = true)
-    Optional<Event> findByCategory_id(Long category_id);
+    Optional<Event> findByCategoryId(Long categoryId);
 
     @Query(value = "select * from events e " +
             "where e.event_date > ?3 and e.event_date < ?4 " +

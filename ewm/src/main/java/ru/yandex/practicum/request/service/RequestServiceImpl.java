@@ -166,7 +166,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void setEventRequests(Event event, int num) {
-        if(event.getConfirmedRequests() == null) {
+        if (event.getConfirmedRequests() == null) {
             event.setConfirmedRequests(0L);
         }
 

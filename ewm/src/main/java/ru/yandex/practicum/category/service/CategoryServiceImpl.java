@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(Long catId) {
         log.info("attempt to delete category id = {} from repo, validation by events", catId);
-        if (eventRepository.findByCategory_id(catId).isEmpty()) {
+        if (eventRepository.findByCategoryId(catId).isEmpty()) {
             Category category = getCategory(catId);
             categoryRepository.delete(category);
             log.info("deleting success");
@@ -90,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("attempt to find category with id = {}", catId);
         return categoryRepository.findById(catId).orElseThrow(() -> {
             log.info("category deleting failure");
-            return new NotFoundException("category with id = " + catId +" is not found");
+            return new NotFoundException("category with id = " + catId + " is not found");
         });
     }
 }
