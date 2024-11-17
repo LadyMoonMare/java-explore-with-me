@@ -45,7 +45,7 @@ public class EventServiceImpl implements EventService {
             return (int) (o2.getId() - o1.getId());
         }
     };
-    private final Set<String> uniqueIp = new HashSet<>();
+    private Set<String> uniqueIp = new HashSet<>();
 
     @Override
     @Transactional
@@ -88,7 +88,7 @@ public class EventServiceImpl implements EventService {
         User user = getUser(userId);
         Event event = getEventById(eventId);
 
-        if (!event.getUser().equals(user)) {
+        if (!event.getUser().getId().equals(user.getId())) {
             log.warn("update failure");
             throw new ConflictException("User is not owner of this event");
         }
@@ -413,7 +413,7 @@ public class EventServiceImpl implements EventService {
         log.info("validation by event date {}", date);
         if (date.isBefore(LocalDateTime.now().plusHours(2))) {
             log.warn("adding event failure");
-            throw new ConflictException("Invalid event date. Date must be after two hours from now");
+            throw new ValidationException("Invalid event date. Date must be after two hours from now");
         }
     }
 

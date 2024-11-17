@@ -14,6 +14,7 @@ import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,6 +59,12 @@ public class UserServiceImpl implements UserService {
         if (ids == null) {
             log.info("getting all users with limit {} and from {}", size, from);
             return userRepository.findAllButLimit(from,size).stream()
+                        .sorted(new Comparator<User>() {
+                            @Override
+                            public int compare(User o1, User o2) {
+                                return (int) (o1.getId() - o2.getId());
+                            }
+                        })
                         .map(UserMapper::toUserDtoFromUser)
                         .collect(Collectors.toList());
         } else {

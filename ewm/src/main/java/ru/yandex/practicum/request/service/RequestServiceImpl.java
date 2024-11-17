@@ -65,7 +65,7 @@ public class RequestServiceImpl implements RequestService {
             requestRepository.save(request);
 
             setEventRequests(event,1);
-            log.info("adding success");
+            log.info("adding confirmed success");
             return RequestMapper.fromRequestToDto(request);
         } else {
             Request request = new Request(LocalDateTime.now(), event, user, RequestState.PENDING);
@@ -86,9 +86,8 @@ public class RequestServiceImpl implements RequestService {
         User user = getUser(userId);
 
         if (request.getState().equals(RequestState.CONFIRMED)) {
-            log.info("reducing number of requests for event");
-            Event event = getEventById(request.getEvent().getId());
-            setEventRequests(event,-1);
+            log.warn("failure");
+            throw new ConflictException("Request is already confirmed");
         }
 
         request.setState(RequestState.CANCELED);
@@ -150,9 +149,9 @@ public class RequestServiceImpl implements RequestService {
 
                     r.setState(request.getStatus());
                     if (request.getStatus().equals(RequestState.CONFIRMED)) {
+                        setEventRequests(event,1);
                         requestRepository.save(r);
                         confirmed.add(r);
-                        setEventRequests(event,1);
                     } else {
                         requestRepository.save(r);
                         rejected.add(r);
@@ -172,6 +171,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         event.setConfirmedRequests(event.getConfirmedRequests() + num);
+        log.info("{}", event.getConfirmedRequests());
         eventRepository.save(event);
     }
 
