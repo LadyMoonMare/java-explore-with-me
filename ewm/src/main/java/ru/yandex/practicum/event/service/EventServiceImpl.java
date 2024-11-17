@@ -93,6 +93,11 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("User is not owner of this event");
         }
 
+        if (event.getState().equals(State.PUBLISHED)) {
+            log.warn("failure");
+            throw new ConflictException("Published event cannot be changed");
+        }
+
         if (dto.getStateAction() != null) {
             log.info("new state {}", dto.getStateAction());
             if (dto.getStateAction().equals(State.CANCEL_REVIEW)) {
