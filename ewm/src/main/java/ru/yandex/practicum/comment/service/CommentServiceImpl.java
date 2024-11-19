@@ -1,11 +1,13 @@
 package ru.yandex.practicum.comment.service;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.comment.dto.CommentDto;
 import ru.yandex.practicum.comment.dto.NewCommentDto;
+import ru.yandex.practicum.comment.dto.UpdateAdminDto;
 import ru.yandex.practicum.comment.dto.mapper.CommentMapper;
 import ru.yandex.practicum.comment.model.Comment;
 import ru.yandex.practicum.comment.model.CommentState;
@@ -20,6 +22,10 @@ import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -105,6 +111,87 @@ public class CommentServiceImpl {
         validateComment(author,event,comment);
 
         return CommentMapper.fromCommentToDto(comment);
+    }
+
+    public CommentDto getCommentByAdmin(Long commentId) {
+        log.info("attempt to get comment by admin {}", commentId);
+        Comment comment = getComment(commentId);
+        return CommentMapper.fromCommentToDto(comment);
+    }
+
+    @Transactional
+    public CommentDto approveCommentByAdmin(Long commentId, UpdateAdminDto dto) {
+        log.info("attempt to update comment {} by admin", commentId);
+        Comment comment = getComment(commentId);
+
+        if (!comment.getState().equals(CommentState.PENDING)) {
+            log.warn("update failure");
+            throw new ConflictException("Admin cannot approve published or cancelled comments");
+        }
+
+        if (dto.getState().equals(CommentState.PUBLISH)) {
+            comment.setPublished(LocalDateTime.now());
+            comment.setState(CommentState.PUBLISHED);
+        } else if (dto.getState().equals(CommentState.REJECT)) {
+            comment.setState(CommentState.REJECTED);
+        } else {
+            log.warn("moderation failure");
+            throw new ValidationException("Unexpected state");
+        }
+
+        comment = commentRepository.save(comment);
+        log.info("updating success");
+        return CommentMapper.fromCommentToDto(comment);
+    }
+
+    public List<CommentDto> getCommentsByAdmin(Long[] events, String[] states,
+                                               LocalDateTime start, LocalDateTime end, Integer from,
+                                               Integer size) {
+        log.info("attempt to get comments from repo");
+        List<Comment> allComments;
+        List<Comment> finalList = new ArrayList<>();
+
+        if (start == null && end == null) {
+            log.info("getting all comments from repo");
+            allComments = commentRepository.findAllButLimit(from, size);
+        } else {
+            if (start != null && end != null) {
+                allComments = commentRepository.findAllButLimitAndTime(from, size, start, end);
+            } else if (start != null) {
+                allComments = commentRepository.findAllButLimitAndStart(from, size, start);
+            } else {
+                allComments = commentRepository.findAllButLimitAndEnd(from, size, end);
+            }
+        }
+
+        if (events != null) {
+            log.info("filter by events");
+            for (Long id : events) {
+                List<Comment> sublist = allComments.stream()
+                        .filter(c -> Objects.equals(c.getEvent().getId(),id))
+                        .toList();
+                finalList.addAll(sublist);
+            }
+        }
+
+        if (states != null) {
+            log.info("filter by states");
+            for (String state : states) {
+                List<Comment> sublist = allComments.stream()
+                        .filter(c -> Objects.equals(c.getState(),CommentState.valueOf(state)))
+                        .toList();
+                finalList.addAll(sublist);
+            }
+        }
+
+        if (finalList.isEmpty()) {
+            log.info("no special filters");
+            finalList = allComments;
+        }
+
+        return new HashSet<>(finalList).stream()
+                .map(CommentMapper ::fromCommentToDto)
+                .toList();
     }
 
     private void validateComment(User author, Event event, Comment comment) {

@@ -1,12 +1,35 @@
 package ru.yandex.practicum.comment.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.yandex.practicum.comment.model.Comment;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.user.model.User;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment,Long> {
     Optional<Comment> findByAuthorAndEvent(User author, Event event);
+
+    @Query(value = "select * from comments c " +
+            "where c.created_on > ?3 and c.created_on < ?4 " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Comment> findAllButLimitAndTime(Integer from, Integer size,
+                                         LocalDateTime start, LocalDateTime end);
+
+    @Query(value = "select * from comments c " +
+            "where c.created_on > ?3 " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Comment> findAllButLimitAndStart(Integer from, Integer size, LocalDateTime start);
+
+    @Query(value = "select * from comments c " +
+            "where c.created_on < ?3 " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Comment> findAllButLimitAndEnd(Integer from, Integer size, LocalDateTime end);
+
+    @Query(value = "select * from comments c " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Comment> findAllButLimit(Integer from, Integer size);
 }
