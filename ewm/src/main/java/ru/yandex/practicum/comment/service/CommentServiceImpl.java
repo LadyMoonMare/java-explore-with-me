@@ -51,12 +51,6 @@ public class CommentServiceImpl implements CommentService {
             log.warn("validation failure");
             throw new ConflictException("author cannot write comments to own events");
         }
-
-        if (event.getEventDate().isAfter(LocalDateTime.now())) {
-            log.warn("validation failure");
-            throw new ConflictException("Event must be done");
-        }
-
         if (requestRepository.findByRequester(author).isEmpty() ||
                 !requestRepository.findByRequester(author).get().getEvent().getId().equals(eventId) ||
                 !requestRepository.findByRequester(author).get().getState()
@@ -65,13 +59,13 @@ public class CommentServiceImpl implements CommentService {
             throw new ConflictException("User must be participant of event");
         }
 
-        if (commentRepository.findByAuthorAndEvent(author,event).isPresent()) {
+        if (commentRepository.findByAuthorAndEvent(userId,eventId).isPresent()) {
             log.warn("validation failure");
             throw new ConflictException("Only one comment is acceptable");
         }
 
         Comment comment = new Comment(author, dto.getDescription(), CommentState.PENDING,
-                LocalDateTime.now(), event);
+                LocalDateTime.now(), eventId);
         comment = commentRepository.save(comment);
         log.info("adding success");
         return CommentMapper.fromCommentToDto(comment);
@@ -178,7 +172,7 @@ public class CommentServiceImpl implements CommentService {
             log.info("filter by events");
             for (Long id : events) {
                 List<Comment> sublist = allComments.stream()
-                        .filter(c -> Objects.equals(c.getEvent().getId(),id))
+                        .filter(c -> Objects.equals(c.getEvent(),id))
                         .toList();
                 finalList.addAll(sublist);
             }
@@ -262,7 +256,7 @@ public class CommentServiceImpl implements CommentService {
     private void validateComment(User author, Event event, Comment comment) {
         log.info("validation");
         if (!author.getId().equals(comment.getAuthor().getId()) ||
-                !event.getId().equals(comment.getEvent().getId())) {
+                !event.getId().equals(comment.getEvent())) {
             log.warn("validation failure");
             throw new ConflictException("Comment must relay to user and event");
         }

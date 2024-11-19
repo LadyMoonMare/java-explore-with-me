@@ -4,15 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.yandex.practicum.comment.model.Comment;
 import ru.yandex.practicum.comment.model.CommentState;
-import ru.yandex.practicum.event.model.Event;
-import ru.yandex.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment,Long> {
-    Optional<Comment> findByAuthorAndEvent(User author, Event event);
+    @Query(value = "select * from comments c " +
+            "where c.author_id = ?1 and c.event_id = ?2 ", nativeQuery = true)
+    Optional<Comment> findByAuthorAndEvent(Long author, Long event);
 
     @Query(value = "select * from comments c " +
             "where c.created_on > ?3 and c.created_on < ?4 " +

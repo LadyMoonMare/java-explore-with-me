@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,13 +26,12 @@ public class Comment {
     private CommentState state;
     @Column(name = "created_on")
     private LocalDateTime created;
-    @Column(name = "published")
+    @Column(name = "published_on")
     private LocalDateTime published;
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", referencedColumnName = "id")
-    private Event event;
+    @Column(name = "event_id")
+    private Long event;
 
-    public Comment(User author, String description, CommentState state, LocalDateTime created, Event event) {
+    public Comment(User author, String description, CommentState state, LocalDateTime created, Long event) {
         this.author = author;
         this.description = description;
         this.state = state;

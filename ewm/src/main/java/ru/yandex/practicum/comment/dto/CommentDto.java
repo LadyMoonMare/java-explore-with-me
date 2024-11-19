@@ -21,5 +21,5 @@ public class CommentDto {
     private CommentState state;
     private LocalDateTime created;
     private LocalDateTime published;
-    private Event event;
+    private Long event;
 }
