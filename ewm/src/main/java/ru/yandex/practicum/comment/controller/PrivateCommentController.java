@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.comment.dto.CommentDto;
 import ru.yandex.practicum.comment.dto.NewCommentDto;
-import ru.yandex.practicum.comment.service.CommentServiceImpl;
+import ru.yandex.practicum.comment.service.CommentService;
 
 @RestController
 @Slf4j
@@ -17,7 +17,7 @@ import ru.yandex.practicum.comment.service.CommentServiceImpl;
 @RequiredArgsConstructor
 @Validated
 public class PrivateCommentController {
-    private final CommentServiceImpl commentService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

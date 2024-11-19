@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.comment.dto.CommentDto;
 import ru.yandex.practicum.comment.dto.UpdateAdminDto;
-import ru.yandex.practicum.comment.service.CommentServiceImpl;
+import ru.yandex.practicum.comment.service.CommentService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class AdminCommentController {
-    private final CommentServiceImpl commentService;
+    private final CommentService commentService;
 
     @GetMapping("/{comId}")
     public CommentDto getComment(@PathVariable @Positive Long comId) {

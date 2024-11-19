@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.comment.dto.ShortCommentDto;
-import ru.yandex.practicum.comment.service.CommentServiceImpl;
+import ru.yandex.practicum.comment.service.CommentService;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class PublicCommentController {
-    private final CommentServiceImpl commentService;
+    private final CommentService commentService;
 
     @GetMapping
     public List<ShortCommentDto> getComments(@PathVariable @Positive Long eventId,

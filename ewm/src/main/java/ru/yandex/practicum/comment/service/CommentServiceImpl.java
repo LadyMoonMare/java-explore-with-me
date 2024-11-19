@@ -2,7 +2,6 @@ package ru.yandex.practicum.comment.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,13 +32,14 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CommentServiceImpl {
+public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final HitClient hitClient;
 
+    @Override
     @Transactional
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
         log.info("attempt to add comment to repo");
@@ -77,6 +77,7 @@ public class CommentServiceImpl {
         return CommentMapper.fromCommentToDto(comment);
     }
 
+    @Override
     @Transactional
     public CommentDto updateCommentByUser(Long userId, Long eventId, Long commentId, NewCommentDto dto) {
         log.info("attempt to update comment {}", commentId);
@@ -94,6 +95,7 @@ public class CommentServiceImpl {
         return CommentMapper.fromCommentToDto(comment);
     }
 
+    @Override
     @Transactional
     public void deleteComment(Long userId, Long eventId, Long commentId) {
         log.info("attempt to delete comment {}", commentId);
@@ -106,6 +108,7 @@ public class CommentServiceImpl {
         log.info("deleting success");
     }
 
+    @Override
     public CommentDto getCommentById(Long userId, Long eventId, Long commentId) {
         log.info("attempt to get comment {}", commentId);
 
@@ -117,12 +120,14 @@ public class CommentServiceImpl {
         return CommentMapper.fromCommentToDto(comment);
     }
 
+    @Override
     public CommentDto getCommentByAdmin(Long commentId) {
         log.info("attempt to get comment by admin {}", commentId);
         Comment comment = getComment(commentId);
         return CommentMapper.fromCommentToDto(comment);
     }
 
+    @Override
     @Transactional
     public CommentDto approveCommentByAdmin(Long commentId, UpdateAdminDto dto) {
         log.info("attempt to update comment {} by admin", commentId);
@@ -148,6 +153,7 @@ public class CommentServiceImpl {
         return CommentMapper.fromCommentToDto(comment);
     }
 
+    @Override
     public List<CommentDto> getCommentsByAdmin(Long[] events, String[] states,
                                                LocalDateTime start, LocalDateTime end, Integer from,
                                                Integer size) {
@@ -198,6 +204,7 @@ public class CommentServiceImpl {
                 .toList();
     }
 
+    @Override
     public List<ShortCommentDto> getCommentsToEventByPublic(Long eventId, String sort, Integer from,
                                                             Integer size, HttpServletRequest request) {
         log.info("attempt to get all comments to event {} from repo", eventId);
