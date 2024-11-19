@@ -3,6 +3,7 @@ package ru.yandex.practicum.comment.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.yandex.practicum.comment.model.Comment;
+import ru.yandex.practicum.comment.model.CommentState;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.user.model.User;
 
@@ -32,4 +33,10 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
     @Query(value = "select * from comments c " +
             "limit ?2 offset ?1 ", nativeQuery = true)
     List<Comment> findAllButLimit(Integer from, Integer size);
+
+    @Query(value = "select * from comments c " +
+            "where c.event_id = ?3 and c.state = ?4 " +
+            "limit ?2 offset ?1 ", nativeQuery = true)
+    List<Comment> findAllByEventAndStateButLimit(Long eventId, Integer from,
+                                         Integer size, CommentState state);
 }

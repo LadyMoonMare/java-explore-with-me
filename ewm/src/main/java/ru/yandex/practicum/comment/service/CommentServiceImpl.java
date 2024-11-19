@@ -1,17 +1,22 @@
 package ru.yandex.practicum.comment.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ValidationException;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.HitClient;
 import ru.yandex.practicum.comment.dto.CommentDto;
 import ru.yandex.practicum.comment.dto.NewCommentDto;
+import ru.yandex.practicum.comment.dto.ShortCommentDto;
 import ru.yandex.practicum.comment.dto.UpdateAdminDto;
 import ru.yandex.practicum.comment.dto.mapper.CommentMapper;
 import ru.yandex.practicum.comment.model.Comment;
 import ru.yandex.practicum.comment.model.CommentState;
 import ru.yandex.practicum.comment.repository.CommentRepository;
+import ru.yandex.practicum.dto.hit.HitDto;
 import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.event.repository.EventRepository;
 import ru.yandex.practicum.exception.ConflictException;
@@ -22,10 +27,8 @@ import ru.yandex.practicum.user.model.User;
 import ru.yandex.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,6 +38,7 @@ public class CommentServiceImpl {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final HitClient hitClient;
 
     @Transactional
     public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
@@ -192,6 +196,60 @@ public class CommentServiceImpl {
         return new HashSet<>(finalList).stream()
                 .map(CommentMapper ::fromCommentToDto)
                 .toList();
+    }
+
+    public List<ShortCommentDto> getCommentsToEventByPublic(Long eventId, String sort, Integer from,
+                                                            Integer size, HttpServletRequest request) {
+        log.info("attempt to get all comments to event {} from repo", eventId);
+        Event event = getEvent(eventId);
+
+        log.info("sort validation");
+
+        List<Comment> allComments = commentRepository.findAllByEventAndStateButLimit(eventId,
+                from, size, CommentState.PUBLISHED);
+
+        if (sort.equals("NEW")) {
+            allComments.sort(new Comparator<Comment>() {
+                        @Override
+                        public int compare(Comment o1, Comment o2) {
+                            if (o1.getPublished().isAfter(o2.getPublished())) {
+                                return 1;
+                            } else if (o1.getPublished().isBefore(o2.getPublished())) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
+        } else if (sort.equals("LAST")) {
+            allComments.sort(new Comparator<Comment>() {
+                        @Override
+                        public int compare(Comment o1, Comment o2) {
+                            if (o1.getPublished().isAfter(o2.getPublished())) {
+                                return -1;
+                            } else if (o1.getPublished().isBefore(o2.getPublished())) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
+        } else {
+            log.warn("failure");
+            throw new ValidationException("Unacceptable sort" + sort);
+        }
+
+        log.info("adding statistics");
+        hitClient.hitEndpoint(HitDto.builder()
+                .app("ewm-main-service")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        return allComments.stream()
+                .map(CommentMapper ::fromCommentToShortDto)
+                .collect(Collectors.toList());
     }
 
     private void validateComment(User author, Event event, Comment comment) {
