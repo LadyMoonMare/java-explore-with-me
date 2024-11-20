@@ -64,11 +64,11 @@ public class CommentServiceImpl implements CommentService {
             throw new ConflictException("Only one comment is acceptable");
         }
 
-        Comment comment = new Comment(author, dto.getDescription(), CommentState.PENDING,
+        Comment comment = new Comment(userId, dto.getDescription(), CommentState.PENDING,
                 LocalDateTime.now(), eventId);
         comment = commentRepository.save(comment);
         log.info("adding success");
-        return CommentMapper.fromCommentToDto(comment);
+        return CommentMapper.fromCommentToDto(comment, author,event);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setPublished(null);
         comment = commentRepository.save(comment);
         log.info("updating success");
-        return CommentMapper.fromCommentToDto(comment);
+        return CommentMapper.fromCommentToDto(comment,author,event);
     }
 
     @Override
@@ -111,14 +111,16 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = getComment(commentId);
         validateComment(author,event,comment);
 
-        return CommentMapper.fromCommentToDto(comment);
+        return CommentMapper.fromCommentToDto(comment,author,event);
     }
 
     @Override
     public CommentDto getCommentByAdmin(Long commentId) {
         log.info("attempt to get comment by admin {}", commentId);
         Comment comment = getComment(commentId);
-        return CommentMapper.fromCommentToDto(comment);
+        User author = getUser(comment.getAuthor());
+        Event event = getEvent(comment.getEvent());
+        return CommentMapper.fromCommentToDto(comment,author,event);
     }
 
     @Override
@@ -126,6 +128,8 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto approveCommentByAdmin(Long commentId, UpdateAdminDto dto) {
         log.info("attempt to update comment {} by admin", commentId);
         Comment comment = getComment(commentId);
+        User author = getUser(comment.getAuthor());
+        Event event = getEvent(comment.getEvent());
 
         if (!comment.getState().equals(CommentState.PENDING)) {
             log.warn("update failure");
@@ -144,7 +148,7 @@ public class CommentServiceImpl implements CommentService {
 
         comment = commentRepository.save(comment);
         log.info("updating success");
-        return CommentMapper.fromCommentToDto(comment);
+        return CommentMapper.fromCommentToDto(comment,author,event);
     }
 
     @Override
@@ -194,7 +198,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return new HashSet<>(finalList).stream()
-                .map(CommentMapper ::fromCommentToDto)
+                .map(c -> CommentMapper.fromCommentToDto(c,getUser(c.getAuthor()),getEvent(c.getEvent())))
                 .toList();
     }
 
@@ -206,8 +210,10 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("sort validation");
 
-        List<Comment> allComments = commentRepository.findAllByEventAndStateButLimit(eventId,
-                from, size, CommentState.PUBLISHED);
+        List<Comment> allComments = commentRepository.findAllByEventButLimit(eventId,
+                from, size).stream()
+                .filter(c -> c.getState().equals(CommentState.PUBLISHED))
+                .collect(Collectors.toList());
 
         if (sort.equals("NEW")) {
             allComments.sort(new Comparator<Comment>() {
@@ -249,13 +255,13 @@ public class CommentServiceImpl implements CommentService {
                 .build());
 
         return allComments.stream()
-                .map(CommentMapper ::fromCommentToShortDto)
+                .map(c -> CommentMapper.fromCommentToShortDto(c,getUser(c.getId())))
                 .collect(Collectors.toList());
     }
 
     private void validateComment(User author, Event event, Comment comment) {
         log.info("validation");
-        if (!author.getId().equals(comment.getAuthor().getId()) ||
+        if (!author.getId().equals(comment.getAuthor()) ||
                 !event.getId().equals(comment.getEvent())) {
             log.warn("validation failure");
             throw new ConflictException("Comment must relay to user and event");

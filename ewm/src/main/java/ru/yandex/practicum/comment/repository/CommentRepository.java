@@ -35,8 +35,7 @@ public interface CommentRepository extends JpaRepository<Comment,Long> {
     List<Comment> findAllButLimit(Integer from, Integer size);
 
     @Query(value = "select * from comments c " +
-            "where c.event_id = ?3 and c.state = ?4 " +
-            "limit ?2 offset ?1 ", nativeQuery = true)
-    List<Comment> findAllByEventAndStateButLimit(Long eventId, Integer from,
-                                         Integer size, CommentState state);
+            "where c.event_id = ?1 " +
+            "limit ?3 offset ?2 ", nativeQuery = true)
+    List<Comment> findAllByEventButLimit(Long eventId, Integer from, Integer size);
 }
