@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.comment.model.CommentState;
 import ru.yandex.practicum.event.dto.EventShortDto;
-import ru.yandex.practicum.event.model.Event;
 import ru.yandex.practicum.user.dto.UserShortDto;
-import ru.yandex.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 

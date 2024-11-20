@@ -3,7 +3,6 @@ package ru.yandex.practicum.comment.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.yandex.practicum.comment.model.Comment;
-import ru.yandex.practicum.comment.model.CommentState;
 
 import java.time.LocalDateTime;
 import java.util.List;
