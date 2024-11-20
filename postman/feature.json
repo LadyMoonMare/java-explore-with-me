@@ -383,7 +383,7 @@
 							"variable": [
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -412,7 +412,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/users/:userId/requests?eventId=1",
+							"raw": "http://localhost:8080/users/:userId/requests?eventId=107",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -426,13 +426,13 @@
 							"query": [
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							],
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								}
 							]
 						}
@@ -461,7 +461,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/users/:userId/requests?eventId=1",
+							"raw": "http://localhost:8080/users/:userId/requests?eventId=107",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -475,13 +475,13 @@
 							"query": [
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							],
 							"variable": [
 								{
 									"key": "userId",
-									"value": "3"
+									"value": "140"
 								}
 							]
 						}
@@ -510,7 +510,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/users/:userId/requests?eventId=1",
+							"raw": "http://localhost:8080/users/:userId/requests?eventId=107",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -524,13 +524,13 @@
 							"query": [
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							],
 							"variable": [
 								{
 									"key": "userId",
-									"value": "4"
+									"value": "141"
 								}
 							]
 						}
@@ -582,7 +582,7 @@
 							"variable": [
 								{
 									"key": "eventId",
-									"value": "2"
+									"value": "108"
 								}
 							]
 						}
@@ -1359,7 +1359,7 @@
 							"variable": [
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
