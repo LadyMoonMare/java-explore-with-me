@@ -257,7 +257,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"annotation\" : \"test1event1test1event1\",\r\n    \"category\": 1,\r\n    \"description\" : \" description for event1, test, description for event1, test\",\r\n    \"eventDate\" : \"2025-10-22 13:13:13\",\r\n    \"location\" : {\r\n        \"lat\" : 50.50,\r\n        \"lon\" : 30.30\r\n    },\r\n    \"paid\" : false,\r\n    \"participantLimit\" : 0,\r\n    \"requestModeration\":false,\r\n    \"title\" : \"Event1 test1\"\r\n}",
+							"raw": "{\r\n    \"annotation\" : \"test1event1test1event1\",\r\n    \"category\": 123,\r\n    \"description\" : \" description for event1, test, description for event1, test\",\r\n    \"eventDate\" : \"2025-10-22 13:13:13\",\r\n    \"location\" : {\r\n        \"lat\" : 50.50,\r\n        \"lon\" : 30.30\r\n    },\r\n    \"paid\" : false,\r\n    \"participantLimit\" : 0,\r\n    \"requestModeration\":false,\r\n    \"title\" : \"Event1 test1\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -279,7 +279,7 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "138"
 								}
 							]
 						}
@@ -309,7 +309,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"annotation\" : \"test2event2test2event2\",\r\n    \"category\": 1,\r\n    \"description\" : \" description for event2, test, description for event2, test\",\r\n    \"eventDate\" : \"2025-10-22 13:13:13\",\r\n    \"location\" : {\r\n        \"lat\" : 50.50,\r\n        \"lon\" : 30.30\r\n    },\r\n    \"paid\" : false,\r\n    \"participantLimit\" : 10,\r\n    \"requestModeration\":true,\r\n    \"title\" : \"Event2 test2\"\r\n}",
+							"raw": "{\r\n    \"annotation\" : \"test2event2test2event2\",\r\n    \"category\": 123,\r\n    \"description\" : \" description for event2, test, description for event2, test\",\r\n    \"eventDate\" : \"2025-10-22 13:13:13\",\r\n    \"location\" : {\r\n        \"lat\" : 50.50,\r\n        \"lon\" : 30.30\r\n    },\r\n    \"paid\" : false,\r\n    \"participantLimit\" : 10,\r\n    \"requestModeration\":true,\r\n    \"title\" : \"Event2 test2\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -331,7 +331,7 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								}
 							]
 						}
@@ -682,11 +682,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -744,11 +744,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -892,11 +892,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -1097,11 +1097,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "3"
+									"value": "140"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -1242,11 +1242,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "3"
+									"value": "140"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -1402,11 +1402,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": ""
+									"value": "141"
 								},
 								{
 									"key": "eventId",
-									"value": ""
+									"value": "107"
 								}
 							]
 						}
@@ -1444,11 +1444,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "4"
+									"value": "141"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -1486,11 +1486,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "4"
+									"value": "141"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -1541,11 +1541,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -1600,11 +1600,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -1660,11 +1660,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "139"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
@@ -1849,11 +1849,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "137"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -1907,11 +1907,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "137"
 								},
 								{
 									"key": "eventId",
-									"value": "2"
+									"value": "108"
 								}
 							]
 						}
@@ -1956,7 +1956,7 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "137"
 								}
 							]
 						}
@@ -2010,11 +2010,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "137"
 								},
 								{
 									"key": "eventId",
-									"value": "2"
+									"value": "108"
 								}
 							]
 						}
@@ -2068,11 +2068,11 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "138"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								}
 							]
 						}
@@ -2179,7 +2179,7 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "19"
+									"value": "200"
 								},
 								{
 									"key": "eventId",
@@ -2237,7 +2237,7 @@
 								},
 								{
 									"key": "eventId",
-									"value": "20"
+									"value": "200"
 								}
 							]
 						}
@@ -2288,15 +2288,15 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "138"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
-									"value": "10"
+									"value": "100"
 								}
 							]
 						}
@@ -2350,15 +2350,15 @@
 							"variable": [
 								{
 									"key": "userId",
-									"value": "2"
+									"value": "138"
 								},
 								{
 									"key": "eventId",
-									"value": "1"
+									"value": "107"
 								},
 								{
 									"key": "comId",
-									"value": "10"
+									"value": "100"
 								}
 							]
 						}
