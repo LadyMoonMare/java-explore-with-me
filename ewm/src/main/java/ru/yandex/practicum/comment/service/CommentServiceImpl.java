@@ -1,0 +1,294 @@
+package ru.yandex.practicum.comment.service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.HitClient;
+import ru.yandex.practicum.comment.dto.CommentDto;
+import ru.yandex.practicum.comment.dto.NewCommentDto;
+import ru.yandex.practicum.comment.dto.ShortCommentDto;
+import ru.yandex.practicum.comment.dto.UpdateAdminDto;
+import ru.yandex.practicum.comment.dto.mapper.CommentMapper;
+import ru.yandex.practicum.comment.model.Comment;
+import ru.yandex.practicum.comment.model.CommentState;
+import ru.yandex.practicum.comment.repository.CommentRepository;
+import ru.yandex.practicum.dto.hit.HitDto;
+import ru.yandex.practicum.event.model.Event;
+import ru.yandex.practicum.event.repository.EventRepository;
+import ru.yandex.practicum.exception.ConflictException;
+import ru.yandex.practicum.exception.NotFoundException;
+import ru.yandex.practicum.request.model.RequestState;
+import ru.yandex.practicum.request.repository.RequestRepository;
+import ru.yandex.practicum.user.model.User;
+import ru.yandex.practicum.user.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class CommentServiceImpl implements CommentService {
+    private final CommentRepository commentRepository;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
+    private final HitClient hitClient;
+
+    @Override
+    @Transactional
+    public CommentDto addComment(Long userId, Long eventId, NewCommentDto dto) {
+        log.info("attempt to add comment to repo");
+        User author = getUser(userId);
+        Event event = getEvent(eventId);
+
+        log.info("validation");
+        if (author.getId().equals(event.getUser().getId())) {
+            log.warn("validation failure");
+            throw new ConflictException("author cannot write comments to own events");
+        }
+        if (requestRepository.findByRequester(author).isEmpty() ||
+                !requestRepository.findByRequester(author).get().getEvent().getId().equals(eventId) ||
+                !requestRepository.findByRequester(author).get().getState()
+                        .equals(RequestState.CONFIRMED)) {
+            log.warn("validation failure");
+            throw new ConflictException("User must be participant of event");
+        }
+
+        if (commentRepository.findByAuthorAndEvent(userId,eventId).isPresent()) {
+            log.warn("validation failure");
+            throw new ConflictException("Only one comment is acceptable");
+        }
+
+        Comment comment = new Comment(userId, dto.getDescription(), CommentState.PENDING,
+                LocalDateTime.now(), eventId);
+        comment = commentRepository.save(comment);
+        log.info("adding success");
+        return CommentMapper.fromCommentToDto(comment, author,event);
+    }
+
+    @Override
+    @Transactional
+    public CommentDto updateCommentByUser(Long userId, Long eventId, Long commentId, NewCommentDto dto) {
+        log.info("attempt to update comment {}", commentId);
+        User author = getUser(userId);
+        Event event = getEvent(eventId);
+        Comment comment = getComment(commentId);
+
+        validateComment(author,event,comment);
+
+        comment.setDescription(dto.getDescription());
+        comment.setState(CommentState.PENDING);
+        comment.setPublished(null);
+        comment = commentRepository.save(comment);
+        log.info("updating success");
+        return CommentMapper.fromCommentToDto(comment,author,event);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long userId, Long eventId, Long commentId) {
+        log.info("attempt to delete comment {}", commentId);
+        User author = getUser(userId);
+        Event event = getEvent(eventId);
+        Comment comment = getComment(commentId);
+
+        validateComment(author,event,comment);
+        commentRepository.delete(comment);
+        log.info("deleting success");
+    }
+
+    @Override
+    public CommentDto getCommentById(Long userId, Long eventId, Long commentId) {
+        log.info("attempt to get comment {}", commentId);
+
+        User author = getUser(userId);
+        Event event = getEvent(eventId);
+        Comment comment = getComment(commentId);
+        validateComment(author,event,comment);
+
+        return CommentMapper.fromCommentToDto(comment,author,event);
+    }
+
+    @Override
+    public CommentDto getCommentByAdmin(Long commentId) {
+        log.info("attempt to get comment by admin {}", commentId);
+        Comment comment = getComment(commentId);
+        User author = getUser(comment.getAuthor());
+        Event event = getEvent(comment.getEvent());
+        return CommentMapper.fromCommentToDto(comment,author,event);
+    }
+
+    @Override
+    @Transactional
+    public CommentDto approveCommentByAdmin(Long commentId, UpdateAdminDto dto) {
+        log.info("attempt to update comment {} by admin", commentId);
+        Comment comment = getComment(commentId);
+        User author = getUser(comment.getAuthor());
+        Event event = getEvent(comment.getEvent());
+
+        if (!comment.getState().equals(CommentState.PENDING)) {
+            log.warn("update failure");
+            throw new ConflictException("Admin cannot approve published or cancelled comments");
+        }
+
+        if (dto.getState().equals(CommentState.PUBLISH)) {
+            comment.setPublished(LocalDateTime.now());
+            comment.setState(CommentState.PUBLISHED);
+        } else if (dto.getState().equals(CommentState.REJECT)) {
+            comment.setState(CommentState.REJECTED);
+        } else {
+            log.warn("moderation failure");
+            throw new ValidationException("Unexpected state");
+        }
+
+        comment = commentRepository.save(comment);
+        log.info("updating success");
+        return CommentMapper.fromCommentToDto(comment,author,event);
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByAdmin(Long[] events, String[] states,
+                                               LocalDateTime start, LocalDateTime end, Integer from,
+                                               Integer size) {
+        log.info("attempt to get comments from repo");
+        List<Comment> allComments;
+        List<Comment> finalList = new ArrayList<>();
+
+        if (start == null && end == null) {
+            log.info("getting all comments from repo");
+            allComments = commentRepository.findAllButLimit(from, size);
+        } else {
+            if (start != null && end != null) {
+                allComments = commentRepository.findAllButLimitAndTime(from, size, start, end);
+            } else if (start != null) {
+                allComments = commentRepository.findAllButLimitAndStart(from, size, start);
+            } else {
+                allComments = commentRepository.findAllButLimitAndEnd(from, size, end);
+            }
+        }
+
+        if (events != null) {
+            log.info("filter by events");
+            for (Long id : events) {
+                List<Comment> sublist = allComments.stream()
+                        .filter(c -> Objects.equals(c.getEvent(),id))
+                        .toList();
+                finalList.addAll(sublist);
+            }
+        }
+
+        if (states != null) {
+            log.info("filter by states");
+            for (String state : states) {
+                List<Comment> sublist = allComments.stream()
+                        .filter(c -> Objects.equals(c.getState(),CommentState.valueOf(state)))
+                        .toList();
+                finalList.addAll(sublist);
+            }
+        }
+
+        if (finalList.isEmpty()) {
+            log.info("no special filters");
+            finalList = allComments;
+        }
+
+        return new HashSet<>(finalList).stream()
+                .map(c -> CommentMapper.fromCommentToDto(c,getUser(c.getAuthor()),getEvent(c.getEvent())))
+                .toList();
+    }
+
+    @Override
+    public List<ShortCommentDto> getCommentsToEventByPublic(Long eventId, String sort, Integer from,
+                                                            Integer size, HttpServletRequest request) {
+        log.info("attempt to get all comments to event {} from repo", eventId);
+        Event event = getEvent(eventId);
+
+        log.info("sort validation");
+
+        List<Comment> allComments = commentRepository.findAllByEventButLimit(eventId,
+                from, size).stream()
+                .filter(c -> c.getState().equals(CommentState.PUBLISHED))
+                .collect(Collectors.toList());
+
+        if (sort.equals("NEW")) {
+            allComments.sort(new Comparator<Comment>() {
+                        @Override
+                        public int compare(Comment o1, Comment o2) {
+                            if (o1.getPublished().isAfter(o2.getPublished())) {
+                                return 1;
+                            } else if (o1.getPublished().isBefore(o2.getPublished())) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
+        } else if (sort.equals("LAST")) {
+            allComments.sort(new Comparator<Comment>() {
+                        @Override
+                        public int compare(Comment o1, Comment o2) {
+                            if (o1.getPublished().isAfter(o2.getPublished())) {
+                                return -1;
+                            } else if (o1.getPublished().isBefore(o2.getPublished())) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
+        } else {
+            log.warn("failure");
+            throw new ValidationException("Unacceptable sort" + sort);
+        }
+
+        log.info("adding statistics");
+        hitClient.hitEndpoint(HitDto.builder()
+                .app("ewm-main-service")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        return allComments.stream()
+                .map(c -> CommentMapper.fromCommentToShortDto(c,getUser(c.getId())))
+                .collect(Collectors.toList());
+    }
+
+    private void validateComment(User author, Event event, Comment comment) {
+        log.info("validation");
+        if (!author.getId().equals(comment.getAuthor()) ||
+                !event.getId().equals(comment.getEvent())) {
+            log.warn("validation failure");
+            throw new ConflictException("Comment must relay to user and event");
+        }
+    }
+
+    private Comment getComment(Long commentId) {
+        log.info("getting comment with id {}", commentId);
+        return commentRepository.findById(commentId).orElseThrow(() -> {
+            log.warn("validation failure");
+            return new NotFoundException("Comment id =" + commentId + "is not found");
+        });
+    }
+
+    private Event getEvent(Long eventId) {
+        log.info("getting event with id {}", eventId);
+        return eventRepository.findById(eventId).orElseThrow(() -> {
+            log.warn("getting event failure");
+            return new NotFoundException("Event id =" + eventId + "is not found");
+        });
+    }
+
+    private User getUser(Long userId) {
+        log.info("getting user with id {}", userId);
+        return userRepository.findById(userId).orElseThrow(() -> {
+            log.warn("validation failure");
+            return new NotFoundException("User id =" + userId + "is not found");
+        });
+    }
+}
